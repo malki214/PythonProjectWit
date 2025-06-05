@@ -2,6 +2,8 @@
 from file_handeling import *
 import datetime
 import uuid
+import requests
+import json
 
 class Repository:
     def __init__(self, path):
@@ -74,7 +76,7 @@ class Repository:
             return "wit not inited, do wit init"
 
         if not bool(self.__commits):
-            return "not have any commits yet"
+            return "Not have any commits yet"
         #מעבר על המילון והוספת שורה לכל קומיט
         str_log = ""
         for key, val in self.__commits.items():
@@ -126,3 +128,33 @@ class Repository:
         delete_contents(self.path)
         copy_files(path_version, self.path)
         return f"checked-out to version {version_name}"
+
+    def push(self):
+        """
+        שולחת את הקומיט האחרון בקריאת שרת לפרויקט צד שרת של פייתון
+        שמזהה בעיות נפוצות באיכות הקוד ומחזירה גרפים חזותיים ותובנות
+        :return: מה שחוזר מקריאת השרת במקרה שהצליחה
+        """
+        if not path_exists(self.path_wit):
+            return "wit not inited, do wit init"
+
+        if not bool(self.__commits):
+            return "Not have any commits yet"
+
+        last_version_path = concat_path(self.path_commits, list(self.__commits.values())[-1].get_name())
+
+        baseurl = "http://localhost:8000"
+        data = {"path": last_version_path}
+        headers = {'Content-Type': 'application/json'}
+        str_return = "success push!\n"
+
+        response = requests.post(fr"{baseurl}/analyze", data=json.dumps(data), headers=headers)
+        if response.status_code != 200:
+            return f"failed with status {response.status_code}"
+        str_return += f"link to graphs: {response.text}\n"
+
+        response = requests.post(fr"{baseurl}/alerts", data=json.dumps(data), headers=headers)
+        if response.status_code != 200:
+            return f"failed with status {response.status_code}"
+        str_return += response.text.replace('\\n','\n').split("\"")[1]
+        return str_return

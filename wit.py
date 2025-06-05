@@ -42,6 +42,12 @@ def status():
 def checkout (id, file_name):
     click.echo(current_repository.checkout(id, file_name))
 
+
+@click.command()
+def push():
+    click.echo(current_repository.push())
+
+
 # הוספת הפקודות לקבוצת ה-CLI
 cli.add_command(init)
 cli.add_command(add)
@@ -49,7 +55,7 @@ cli.add_command(commit)
 cli.add_command(log)
 cli.add_command(status)
 cli.add_command(checkout)
-
+cli.add_command(push)
 
 if __name__ == '__main__':
     cli()
