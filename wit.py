@@ -45,8 +45,16 @@ def checkout (id, file_name):
 
 @click.command()
 def push():
-    click.echo(current_repository.push())
+    # click.echo(current_repository.push())
+    result = current_repository.push()
 
+    for line in result.splitlines():
+        if "success push!" in line.lower():
+            click.secho(line, fg="green")
+        elif "link to graphs" in line.lower():
+            click.secho(line, fg="cyan")
+        else:
+            click.secho(line, fg="yellow")
 
 # הוספת הפקודות לקבוצת ה-CLI
 cli.add_command(init)
